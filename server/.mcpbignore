@@ -1,0 +1,16 @@
+src/
+docs/
+*.map
+.env
+.env.example
+.git/
+.gitignore
+CHANGELOG.md
+RELEASING.md
+README.md
+README-LOCAL-MAC.md
+install-mac.command
+uninstall-mac.command
+setup-local.mjs
+tsconfig.json
+*.command

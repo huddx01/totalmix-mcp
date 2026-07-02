@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    # macos runner so the .mcpb's node_modules (incl. any native optional
+    # deps) match the platform most Desktop users run TotalMix on.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Tag must match package version
+        run: |
+          V=$(node -p "require('./server/package.json').version")
+          if [ "v$V" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match server/package.json version v$V" >&2
+            exit 1
+          fi
+
+      - name: Build server
+        working-directory: server
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
+
+      - name: Pack .mcpb (Claude Desktop bundle)
+        working-directory: server
+        run: |
+          npm install -g @anthropic-ai/mcpb
+          rm -rf node_modules
+          npm ci --omit=dev
+          mcpb validate manifest.json
+          mcpb pack . ../totalmix-mcp.mcpb
+
+      - name: Zip skill (manual upload for Claude Desktop / claude.ai)
+        run: |
+          cd plugins/totalmix/skills
+          zip -r ../../../totalmix-skill.zip totalmix
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            totalmix-mcp.mcpb totalmix-skill.zip \
+            --title "totalmix-mcp $GITHUB_REF_NAME" \
+            --generate-notes

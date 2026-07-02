@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "totalmix-mcp",
+  "description": "Control an RME TotalMix FX mixer with Claude: MCP server plus mixing skill, local over OSC",
+  "owner": {
+    "name": "SnDTek",
+    "email": "meg33@sndtek.de"
+  },
+  "plugins": [
+    {
+      "name": "totalmix",
+      "description": "RME TotalMix FX control via OSC: levels, mute, solo, pan, routing, headphone mixes, EQ, dynamics, monitoring. Bundles the totalmix MCP server, no separate install needed.",
+      "author": {
+        "name": "SnDTek"
+      },
+      "category": "audio",
+      "source": "./plugins/totalmix"
+    }
+  ]
+}

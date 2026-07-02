@@ -1,0 +1,64 @@
+{
+  "manifest_version": "0.4",
+  "name": "totalmix-mcp",
+  "display_name": "TotalMix FX Control",
+  "version": "0.6.0",
+  "description": "Control an RME TotalMix FX mixer by voice or text through Claude, locally over OSC.",
+  "long_description": "Runs a small local MCP server that talks to RME TotalMix FX over OSC on the same machine (or another host on your LAN). Nothing goes over the internet. Pair it with the TotalMix skill (uploaded separately in Settings > Customize > Skills) for full mixing knowledge: dB conventions, channel mapping, stereo handling, routing, submixes, headphone mixes, EQ, dynamics, and monitoring. Requires TotalMix FX with OSC enabled (Options > OSC).",
+  "author": {
+    "name": "SnDTek",
+    "email": "meg33@sndtek.de"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "dist/stdio.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/stdio.js"],
+      "env": {
+        "TOTALMIX_HOST": "${user_config.totalmix_host}",
+        "TOTALMIX_SEND_PORT": "${user_config.totalmix_send_port}",
+        "TOTALMIX_LISTEN_PORT": "${user_config.totalmix_listen_port}"
+      }
+    }
+  },
+  "tools": [
+    { "name": "send_osc_commands", "description": "Send one or more OSC messages to TotalMix in a single call." },
+    { "name": "get_channel", "description": "Read all parameters of one channel (triggers a resend, then reads the cache)." },
+    { "name": "osc_read", "description": "Read cached values for exact known OSC addresses, no resend." },
+    { "name": "get_channel_names", "description": "List channel names per bus for name-to-index resolution." },
+    { "name": "osc_sync", "description": "Trigger a wide TotalMix resync (sendall or sendsettings)." }
+  ],
+  "keywords": ["rme", "totalmix", "osc", "audio", "mixer", "accessibility"],
+  "license": "UNLICENSED",
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "user_config": {
+    "totalmix_host": {
+      "type": "string",
+      "title": "TotalMix host",
+      "description": "IP address of the machine running TotalMix FX. Use 127.0.0.1 if TotalMix runs on this same computer.",
+      "default": "127.0.0.1",
+      "required": true
+    },
+    "totalmix_send_port": {
+      "type": "number",
+      "title": "OSC send port (TotalMix In Port)",
+      "description": "Port TotalMix listens on for incoming OSC. Matches the In Port in TotalMix Options > OSC.",
+      "default": 7001,
+      "required": false
+    },
+    "totalmix_listen_port": {
+      "type": "number",
+      "title": "OSC listen port (TotalMix Out Port)",
+      "description": "Port this server listens on for OSC status from TotalMix. Matches the Out Port in TotalMix Options > OSC.",
+      "default": 9001,
+      "required": false
+    }
+  }
+}

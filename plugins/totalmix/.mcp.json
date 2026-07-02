@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "totalmix": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/totalmix-mcp-stdio.mjs"],
+      "env": {
+        "TOTALMIX_HOST": "${TOTALMIX_HOST:-127.0.0.1}",
+        "TOTALMIX_SEND_PORT": "${TOTALMIX_SEND_PORT:-7001}",
+        "TOTALMIX_LISTEN_PORT": "${TOTALMIX_LISTEN_PORT:-9001}"
+      }
+    }
+  }
+}

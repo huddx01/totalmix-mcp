@@ -1,0 +1,40 @@
+name: CI
+
+# Gitea Actions variant of .github/workflows/ci.yml, tuned for a modest
+# self-hosted act_runner: v4 actions (v5 needs Node 24 in the runner image),
+# no npm cache (needs a configured cache server). Because .gitea/workflows/
+# exists, Gitea ignores .github/workflows/ entirely — so the macos-only
+# release workflow never queues here.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    # matches the self-hosted act_runner's labels (debian, linux, arm64)
+    runs-on: linux
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        working-directory: server
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: server
+        run: npm run typecheck
+
+      - name: Build
+        working-directory: server
+        run: npm run build
+
+      - name: Bundled plugin server is fresh
+        working-directory: server
+        run: |
+          npm run bundle
+          git diff --exit-code -- ../plugins/totalmix/server/

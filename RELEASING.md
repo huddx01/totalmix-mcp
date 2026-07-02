@@ -48,11 +48,11 @@ Bump all of these together (CI refuses a tag that does not match
 5. The release workflow builds `totalmix-mcp.mcpb` and `totalmix-skill.zip`
    on a macOS runner and attaches both to the GitHub release.
 
-## Deploying the HTTP daemon to a Pi
+## Deploying the HTTP daemon
 
-Build in `server/` on the Mac, copy `dist/`, `package.json`,
-`package-lock.json` and `.env` to the Pi, run `npm ci --omit=dev`, then
-restart the service:
+For hosts running the daemon as a systemd service (see `server/README.md`,
+"Running as a systemd service"): sync `server/`, rebuild, then restart the
+service:
 
 ```bash
 sudo systemctl restart totalmix-mcp

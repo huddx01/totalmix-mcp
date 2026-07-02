@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run this ON THE MAC, from inside the server/ folder:
+# Run this on macOS, from inside the server/ folder:
 #   ./build-mcpb.sh
 #
 # Builds a .mcpb natively with the official Anthropic toolchain, so native

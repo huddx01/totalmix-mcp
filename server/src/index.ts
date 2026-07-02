@@ -1,6 +1,6 @@
-// Entry point. Long-running daemon on the Pi (or the Mac for testing).
+// Entry point. Long-running daemon, typically on an always-on LAN host.
 // Holds ONE OSC connection and cache for the whole process, and exposes the
-// MCP tools over Streamable HTTP so several clients (Mac, iPhone) can talk to
+// MCP tools over Streamable HTTP so several clients can talk to
 // the same cache at once. This is the core change from the old stdio build,
 // where every client spawned its own process and fought over the UDP port.
 
@@ -37,7 +37,7 @@ function buildServer(osc: TotalMixOscClient): McpServer {
 }
 
 // Reject anything without the right bearer token. The daemon binds on all
-// interfaces so the iPhone can reach it; without this, any host on the LAN
+// interfaces so LAN clients can reach it; without this, any host on the LAN
 // could drive the console. Constant-time-ish compare is overkill here but
 // cheap, so we still avoid the trivial early-exit length leak.
 function authorized(req: Request): boolean {
@@ -124,9 +124,9 @@ async function main(): Promise<void> {
   app.get("/mcp", methodNotAllowed);
   app.delete("/mcp", methodNotAllowed);
 
-  // TLS if a cert and key are configured (the Pi, using the existing
-  // self-signed cert already trusted on the clients), plain HTTP otherwise
-  // (handy for local Mac testing). Same code path either way.
+  // TLS if a cert and key are configured (e.g. a self-signed cert trusted
+  // on the clients), plain HTTP otherwise (handy for local testing). Same
+  // code path either way.
   const useTls = TLS_CERT && TLS_KEY;
   const httpServer = useTls
     ? https.createServer({ cert: readFileSync(TLS_CERT), key: readFileSync(TLS_KEY) }, app)

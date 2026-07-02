@@ -2,8 +2,8 @@
 
 MCP server for RME **TotalMix FX** via Global OSC. It runs as a long-running
 HTTP daemon, holds a single OSC connection plus an in-memory state cache, and
-exposes a small set of tools over Streamable HTTP. Several clients (Mac,
-iPhone) can talk to the same cache at once.
+exposes a small set of tools over Streamable HTTP. Several clients (desktop,
+mobile) can talk to the same cache at once.
 
 Status: beta. Functional and in real-world use; a few protocol details are
 still being verified on the device.
@@ -157,24 +157,24 @@ npm start              # uses node --env-file=.env
 probe. `/mcp` is the MCP endpoint and requires the bearer token. See
 "Configuration" above for all `.env` settings.
 
-## Running on the Pi (systemd)
+## Running as a systemd service (e.g. on a Raspberry Pi)
 
-In practice the whole repo folder is synced to the Pi as-is (not just the
-build output) and built there, not pre-built on the Mac:
+Sync this `server/` folder to the host as-is (not just the build output) and
+build there:
 
 ```bash
-# from the Mac
+# from the development machine
 rsync -av --exclude='.git' --exclude='dist' \
-  ~/Documents/Projects/_claude/totalmix-mcp-server/ \
-  <pi-host>:/path/to/totalmix-mcp-server/
+  path/to/totalmix-mcp/server/ \
+  <host>:/path/to/totalmix-mcp-server/
 
-# on the Pi
+# on the host
 cd /path/to/totalmix-mcp-server
 npm install
 npm run build
 ```
 
-`.env` on the Pi is edited locally there and not overwritten by the sync
+`.env` on the host is edited locally there and not overwritten by the sync
 (keep it out of the rsync command, or exclude it explicitly if it lives
 inside the synced folder). Then install a unit like:
 
@@ -217,7 +217,7 @@ sudo systemctl restart totalmix-mcp
 ## Registering in Claude
 
 The daemon is a remote MCP server, so register it as a **Custom Connector**
-pointing at `https://<pi-host>:<port>/mcp` with the bearer token. It is not
+pointing at `https://<host>:<port>/mcp` with the bearer token. It is not
 installed via `plugin install`.
 
 ## Versioning

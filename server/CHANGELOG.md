@@ -7,9 +7,15 @@ Versioning tiers (see [RELEASING.md](../RELEASING.md)): `0.0.x` alpha, `0.x.0`
 beta, `1.0.0+` release. The version here must match `version` in
 `package.json`.
 
-## [Unreleased]
+## [0.7.0] - 2026-07-03
 
 ### Changed
+- MCP server names split by transport: the stdio entry point now announces
+  itself as `totalmix-mcp-stdio` and the HTTP daemon as `totalmix-mcp-http`
+  (both were `totalmix-mcp`). Matches the two connector entries the plugin
+  now registers, so both can be told apart when active side by side.
+- Author metadata: SnDTek -> huddx01 (aka meg33) (manifest.json,
+  plugin.json, marketplace.json).
 - UDP receive buffer default: 4 MiB is now requested on **all** platforms
   (was: OS default everywhere except a detected Raspberry Pi). Trigger: the
   cold-start `/sendall` loss was reproduced and measured on macOS too (2010

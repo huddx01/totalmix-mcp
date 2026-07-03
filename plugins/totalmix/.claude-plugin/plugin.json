@@ -1,8 +1,44 @@
 {
   "name": "totalmix",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Control an RME TotalMix FX mixer via OSC: levels, mute, solo, pan, routing, submixes, headphone mixes, EQ, dynamics, monitoring. Bundles the totalmix MCP server.",
   "author": {
-    "name": "SnDTek"
+    "name": "huddx01 (aka meg33)"
+  },
+  "userConfig": {
+    "totalmix_host": {
+      "type": "string",
+      "title": "TotalMix host",
+      "description": "IP address of the machine running TotalMix FX. Use 127.0.0.1 if TotalMix runs on this same computer. (totalmix-mcp-stdio only.)",
+      "default": "127.0.0.1"
+    },
+    "totalmix_send_port": {
+      "type": "number",
+      "title": "OSC send port (TotalMix In Port)",
+      "description": "Port TotalMix listens on for incoming OSC. Matches the In Port in TotalMix Options > OSC. (totalmix-mcp-stdio only.)",
+      "default": 7001,
+      "min": 1,
+      "max": 65535
+    },
+    "totalmix_listen_port": {
+      "type": "number",
+      "title": "OSC listen port (TotalMix Out Port)",
+      "description": "Port the local server listens on for OSC status from TotalMix. Matches the Out Port in TotalMix Options > OSC. (totalmix-mcp-stdio only.)",
+      "default": 9001,
+      "min": 1,
+      "max": 65535
+    },
+    "http_url": {
+      "type": "string",
+      "title": "HTTP daemon URL",
+      "description": "MCP endpoint of a running totalmix-mcp HTTP daemon, e.g. https://<host>:8765/mcp. Only used by the totalmix-mcp-http connector; ignore it if you only use the local stdio server.",
+      "default": "https://127.0.0.1:8765/mcp"
+    },
+    "http_token": {
+      "type": "string",
+      "title": "HTTP daemon bearer token",
+      "description": "The daemon's MCP_AUTH_TOKEN. Only used by the totalmix-mcp-http connector.",
+      "sensitive": true
+    }
   }
 }

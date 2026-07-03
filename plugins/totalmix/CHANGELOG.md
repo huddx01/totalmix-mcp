@@ -7,6 +7,23 @@ Versioning tiers (see ../../RELEASING.md): 0.0.x alpha, 0.x.0 beta, 1.0.0+
 release. The version here must match the `version` field in
 `.claude-plugin/plugin.json`.
 
+## [0.7.0] - 2026-07-03
+
+### Added
+- Second connector `totalmix-mcp-http` in `.mcp.json`: a URL reference to a
+  running totalmix-mcp HTTP daemon (Streamable HTTP + bearer token). The
+  bundled local server is now registered as `totalmix-mcp-stdio` (was:
+  `totalmix`). Both appear individually under `/mcp` and can be enabled and
+  disabled separately.
+- `userConfig` dialog in `plugin.json`: TotalMix host, OSC send/listen port
+  (for stdio), daemon URL and bearer token (for http; the token goes to the
+  system keychain). Replaces having to export env vars by hand. The expert
+  knobs (`TOTALMIX_BIND_ADDRESS`, `GET_CHANNEL_SETTLE_MS`,
+  `TOTALMIX_UDP_RECV_BUFFER`) still pass through from the environment.
+
+### Changed
+- Author metadata: SnDTek -> huddx01 (aka meg33).
+
 ## [0.6.0] - 2026-07-02
 
 ### Changed

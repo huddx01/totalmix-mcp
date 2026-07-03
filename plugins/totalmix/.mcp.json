@@ -1,12 +1,22 @@
 {
   "mcpServers": {
-    "totalmix": {
+    "totalmix-mcp-stdio": {
       "command": "node",
       "args": ["${CLAUDE_PLUGIN_ROOT}/server/totalmix-mcp-stdio.mjs"],
       "env": {
-        "TOTALMIX_HOST": "${TOTALMIX_HOST:-127.0.0.1}",
-        "TOTALMIX_SEND_PORT": "${TOTALMIX_SEND_PORT:-7001}",
-        "TOTALMIX_LISTEN_PORT": "${TOTALMIX_LISTEN_PORT:-9001}"
+        "TOTALMIX_HOST": "${user_config.totalmix_host}",
+        "TOTALMIX_SEND_PORT": "${user_config.totalmix_send_port}",
+        "TOTALMIX_LISTEN_PORT": "${user_config.totalmix_listen_port}",
+        "TOTALMIX_BIND_ADDRESS": "${TOTALMIX_BIND_ADDRESS:-0.0.0.0}",
+        "GET_CHANNEL_SETTLE_MS": "${GET_CHANNEL_SETTLE_MS:-}",
+        "TOTALMIX_UDP_RECV_BUFFER": "${TOTALMIX_UDP_RECV_BUFFER:-}"
+      }
+    },
+    "totalmix-mcp-http": {
+      "type": "http",
+      "url": "${user_config.http_url}",
+      "headers": {
+        "Authorization": "Bearer ${user_config.http_token}"
       }
     }
   }

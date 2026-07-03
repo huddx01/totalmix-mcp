@@ -1,21 +1,32 @@
-# sndtek TotalMix Plugin
+# totalmix plugin
 
-Skill for controlling an RME TotalMix FX mixer (Fireface UFX III) via OSC. All
-domain knowledge (address building, dB conventions, stereo handling, routing,
-snapshots, global FX) lives in `skills/totalmix/SKILL.md` and its
-`reference/*.md` files, read by Claude directly.
+Plugin for controlling an RME TotalMix FX mixer (Fireface UFX III) via OSC.
+It ships the MCP server (bundled) plus the skill: all domain knowledge
+(address building, dB conventions, stereo handling, routing, snapshots,
+global FX) lives in `skills/totalmix/SKILL.md` and its `reference/*.md`
+files, read by Claude directly.
 
-> **Marketplace:** `sndtek-plugins` &nbsp;·&nbsp; **Plugin:** `totalmix`
+> **Marketplace:** `totalmix-mcp` &nbsp;·&nbsp; **Plugin:** `totalmix`
 
 ---
 
 ## Quick start
 
-Requires a running `totalmix-mcp-server` (separate repo, not part of this
-plugin) reachable from wherever Claude runs. The server talks OSC to TotalMix
-FX on one side and exposes five MCP tools on the other
-(`send_osc_commands`, `get_channel`, `osc_read`, `get_channel_names`,
-`osc_sync`). This plugin only ships the skill, not the server.
+`/plugin install totalmix` is all it takes; the plugin registers two
+connectors (see `.mcp.json`), individually managed under `/mcp`:
+
+- **totalmix-mcp-stdio** — the bundled local server
+  (`server/totalmix-mcp-stdio.mjs`), launched by Claude Code itself. Only
+  needs Node and a reachable TotalMix FX with OSC enabled. Configure host and
+  ports in the plugin's config dialog (`userConfig`).
+- **totalmix-mcp-http** — a URL reference to a running totalmix-mcp HTTP
+  daemon (see `../../server/README.md`), for the shared multi-client setup.
+  Configure URL and bearer token in the same dialog; disable this connector
+  if you only use the local server.
+
+Both expose the same five tools (`send_osc_commands`, `get_channel`,
+`osc_read`, `get_channel_names`, `osc_sync`); enabling both at once means
+Claude sees every tool twice.
 
 ---
 
@@ -24,8 +35,10 @@ FX on one side and exposes five MCP tools on the other
 ```
 .claude-plugin/marketplace.json     # marketplace manifest (repo root)
 plugins/totalmix/
-├── .claude-plugin/plugin.json      # plugin manifest
+├── .claude-plugin/plugin.json      # plugin manifest incl. userConfig dialog
+├── .mcp.json                       # the two connectors (stdio + http)
 ├── CHANGELOG.md
+├── server/totalmix-mcp-stdio.mjs   # bundled stdio server (built from ../../server)
 └── skills/totalmix/
     ├── SKILL.md                    # core conventions, fast path, cheat sheet
     └── reference/

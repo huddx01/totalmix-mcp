@@ -7,6 +7,27 @@ Versioning tiers (see [RELEASING.md](../RELEASING.md)): `0.0.x` alpha, `0.x.0`
 beta, `1.0.0+` release. The version here must match `version` in
 `package.json`.
 
+## [Unreleased]
+
+### Changed
+- UDP receive buffer default: 4 MiB is now requested on **all** platforms
+  (was: OS default everywhere except a detected Raspberry Pi). Trigger: the
+  cold-start `/sendall` loss was reproduced and measured on macOS too (2010
+  MacBook Pro, ~7% of the burst dropped at the 768 KB `net.inet.udp.recvspace`
+  default, proven via `netstat -s -p udp` "dropped due to full socket
+  buffers"). 4 MiB stays under the macOS/BSD `kern.ipc.maxsockbuf` rejection
+  ceiling (8 MB; FreeBSD's effective max is slightly below via `sb_max_adj`)
+  and is granted in full there and on
+  Windows; Linux still clamps to `net.core.rmem_max`. A detected Raspberry Pi
+  keeps 16 MiB. `TOTALMIX_UDP_RECV_BUFFER` still overrides everywhere;
+  `0` now explicitly forces the OS default.
+- `docs/cold-start-packet-loss.md`: added the macOS case (measured over WiFi —
+  the full burst reaches the kernel; the loss is at the socket buffer) and an
+  OS reference for Linux/macOS/BSD/Windows: buffer defaults, ceiling
+  semantics (clamp vs. ENOBUFS-reject vs. no ceiling), sysctl/registry
+  locations, drop counters, and FreeBSD/XNU source links for the
+  `sb_max_adj` ceiling math.
+
 ## [0.6.0] - 2026-07-02
 
 ### Changed

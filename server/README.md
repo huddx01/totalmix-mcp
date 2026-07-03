@@ -66,27 +66,28 @@ All settings come from `.env` (see `.env.example`).
 - `MCP_TLS_CERT` / `MCP_TLS_KEY` set both to serve https with your
   self-signed cert. Leave empty for plain http.
 
-### Cold-start packet loss (required kernel tuning on slower hosts)
+### Cold-start packet loss (UDP receive buffer)
 
-On a host like a Raspberry Pi 3B, a cold-start `/sendall` can land far fewer
-values in the cache than the device actually has (for example ~1000 of ~27000),
-with no error anywhere. This is **not** a bug in this server and **not** packet
-loss on the network. It is the OS-level UDP receive buffer overflowing: the
-whole `/sendall` reply arrives as one dense burst (measured here: ~2100 UDP
-datagrams in ~80 ms), and a slow CPU cannot drain the socket fast enough, so
-the kernel silently discards everything past the buffer's capacity.
+A cold-start `/sendall` can land fewer values in the cache than the device
+actually has, with no error anywhere. This is **not** a bug in this server and
+**not** packet loss on the network. It is the OS-level UDP receive buffer
+overflowing: the whole `/sendall` reply arrives as one dense burst (measured
+here: ~2100 UDP datagrams in ~80 ms), and if the process does not drain the
+socket fast enough, the kernel silently discards everything past the buffer's
+capacity. On a slow host this is catastrophic (a Raspberry Pi 3B cached ~1000
+of ~27000 values); on a faster host it is sporadic (an older MacBook Pro
+dropped ~7% of the burst whenever the process was briefly busy).
 
-This only matters on a slow host. This server auto-detects a Raspberry Pi
-(`src/platform.ts`, via `/proc/cpuinfo`) and only requests a larger receive
-buffer by default there; on anything else, including a Mac, the OS default is
-used and nothing extra is requested. Requesting a large buffer unconditionally
-used to be the default here, but on macOS specifically an oversized request can
-be flatly refused by the kernel (`ERR_SOCKET_BUFFER_SIZE` / `ENOBUFS`) rather
-than clamped like on Linux, so it is now gated to where it is actually needed.
-`TOTALMIX_UDP_RECV_BUFFER` still overrides this explicitly on any host, Pi or
-not, if you want to force it.
+This server therefore requests a larger buffer by default on every platform:
+**4 MiB**, which macOS/BSD and Windows grant in full, and **16 MiB** on a
+detected Raspberry Pi (`src/platform.ts`, via `/proc/cpuinfo`), the measured
+requirement there. A request the OS refuses (macOS/BSD reject anything above
+`kern.ipc.maxsockbuf`, ~8 MB) falls back to the OS default with a log line.
+`TOTALMIX_UDP_RECV_BUFFER` overrides the default on any host; `0` forces the
+OS default.
 
-Two settings address this, and on Linux you generally need both:
+On Linux the request is silently clamped to the kernel ceiling, so there you
+generally need both settings:
 
 1. Raise the kernel ceiling for socket receive buffers (so the per-socket
    request below is allowed through):
@@ -100,19 +101,21 @@ Two settings address this, and on Linux you generally need both:
    sudo sysctl --system
    ```
 2. `TOTALMIX_UDP_RECV_BUFFER` in `.env` (bytes), which this server requests for
-   its OSC socket via `setsockopt(SO_RCVBUF)`. Defaults to 16 MiB. Because it is
-   per-socket, only this server gets the large buffer; the rest of the host is
-   untouched.
+   its OSC socket via `setsockopt(SO_RCVBUF)` (16 MiB on a Pi by default).
+   Because it is per-socket, only this server gets the large buffer; the rest
+   of the host is untouched.
 
 The startup log shows whether the request was honored or clamped:
 
 ```
-[totalmix-mcp] UDP receive buffer: requested 16777216 bytes, OS granted 16777216 bytes
+[totalmix-mcp] UDP receive buffer: requested 4194304 bytes, OS granted 4194304 bytes
 ```
 
-If "granted" is far below "requested", the kernel ceiling (`net.core.rmem_max`)
-is still too low. Verify end to end via `/health` after a fresh start: `cached`
-should land close to the device's real parameter count.
+If "granted" is far below "requested", the kernel ceiling (on Linux:
+`net.core.rmem_max`) is still too low. Verify end to end via `/health` after a
+fresh start: `cached` should land close to the device's real parameter count.
+The kernel also counts every drop; per-OS counter and sysctl commands are in
+the full analysis linked below.
 
 A simpler alternative that needs no kernel or code change: leave TotalMix's own
 **OSC bandwidth limit enabled**. It paces the burst into smaller bursts over

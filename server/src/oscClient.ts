@@ -74,9 +74,9 @@ export class TotalMixOscClient {
       try {
         sock.setRecvBufferSize(config.udpRecvBufferBytes);
       } catch (err) {
-        // Optimization, not a requirement: it matters most on slow hosts
-        // under a dense burst (see docs/cold-start-packet-loss.md), not on a
-        // fast Mac talking to a local or LAN TotalMix. Log and continue with
+        // Not fatal: the server still works with the OS default, it may just
+        // drop part of a cold-start /sendall burst (measured even on a Mac,
+        // see docs/cold-start-packet-loss.md). Log and continue with
         // whatever buffer size the OS default bind already gave us.
         console.error(
           `[totalmix-mcp] Requested UDP receive buffer ${config.udpRecvBufferBytes} bytes was rejected by the OS ` +
@@ -173,8 +173,9 @@ export class TotalMixOscClient {
       );
     } else {
       console.error(
-        `[totalmix-mcp] UDP receive buffer: using OS default (${actual} bytes). Larger buffers are only ` +
-          `requested by default on a detected Raspberry Pi; set TOTALMIX_UDP_RECV_BUFFER in .env to override.`
+        `[totalmix-mcp] UDP receive buffer: using OS default (${actual} bytes) as configured ` +
+          `(TOTALMIX_UDP_RECV_BUFFER=0). Expect dropped values after a cold-start /sendall if the default ` +
+          `is small; see README, "Cold-start packet loss".`
       );
     }
 

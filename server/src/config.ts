@@ -40,16 +40,19 @@ function envInt(name: string, fallback: number): number {
 }
 
 export function loadConfig(): TotalMixConfig {
-  // The larger receive buffer only helps on a host slow enough that a dense
-  // OSC burst can outrun it (proven on a Raspberry Pi 3B, see
-  // docs/cold-start-packet-loss.md). Attempting it anywhere else is at best
-  // pointless and at worst actively harmful: macOS can outright refuse an
-  // oversized request (ERR_SOCKET_BUFFER_SIZE / ENOBUFS). So the default is
-  // conditional: 16 MiB on a detected Raspberry Pi, 0 (OS default, do not
-  // even attempt setRecvBufferSize) everywhere else. TOTALMIX_UDP_RECV_BUFFER
-  // still overrides this explicitly on any host, Raspberry Pi or not.
+  // The OS default receive buffer is too small for the dense /sendall burst
+  // on more hosts than first thought: proven on a Raspberry Pi 3B and later
+  // on a 2010 MacBook Pro (~7% of the burst dropped at 768 KB default), see
+  // docs/cold-start-packet-loss.md. So the default is now enlarged
+  // everywhere: 4 MiB, which macOS/BSD grant in full (their maxsockbuf
+  // ceiling rejects anything above 8 MB — FreeBSD slightly less — with
+  // ENOBUFS), Windows grants
+  // as-is, and Linux silently clamps to net.core.rmem_max. A detected
+  // Raspberry Pi keeps the measured 16 MiB requirement. A rejected request
+  // falls back to the OS default with a log line (see oscClient.ts), and
+  // TOTALMIX_UDP_RECV_BUFFER still overrides on any host (0 = OS default).
   const piModel = detectRaspberryPiModel();
-  const defaultRecvBuffer = piModel !== null ? 16777216 : 0;
+  const defaultRecvBuffer = piModel !== null ? 16777216 : 4194304;
 
   return {
     remoteAddress: process.env.TOTALMIX_HOST ?? "127.0.0.1",

@@ -26770,7 +26770,7 @@ function envInt(name, fallback) {
 }
 function loadConfig() {
   const piModel = detectRaspberryPiModel();
-  const defaultRecvBuffer = piModel !== null ? 16777216 : 0;
+  const defaultRecvBuffer = piModel !== null ? 16777216 : 4194304;
   return {
     remoteAddress: process.env.TOTALMIX_HOST ?? "127.0.0.1",
     remotePort: envInt("TOTALMIX_SEND_PORT", 7001),
@@ -26892,7 +26892,7 @@ var TotalMixOscClient = class {
       );
     } else {
       console.error(
-        `[totalmix-mcp] UDP receive buffer: using OS default (${actual} bytes). Larger buffers are only requested by default on a detected Raspberry Pi; set TOTALMIX_UDP_RECV_BUFFER in .env to override.`
+        `[totalmix-mcp] UDP receive buffer: using OS default (${actual} bytes) as configured (TOTALMIX_UDP_RECV_BUFFER=0). Expect dropped values after a cold-start /sendall if the default is small; see README, "Cold-start packet loss".`
       );
     }
     return { port, socket };

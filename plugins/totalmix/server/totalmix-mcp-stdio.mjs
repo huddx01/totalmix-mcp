@@ -27256,6 +27256,7 @@ var GLOBAL_DEFS = [
     comment: "number starts at 1. rw: TotalMix sends 0 (off) / 2 (active) / 3 (changed) for this snapshot slot, but only accepts the value 1 on write to trigger a load. Enables simple on/off snapshot-key signalling."
   },
   { name: "snapshot/save", template: "/snapshot/save", valueType: "trigger", read: false, write: true, comment: "triggers a /snapshot/load message for the newly active snapshot" },
+  { name: "layout/save", template: "/layout/save", valueType: "trigger", read: false, write: true, comment: "write-only trigger, never sent back (device-confirmed, not explicit in the 260626 spec table)" },
   { name: "layout/load", template: "/layout/load/{n}", valueType: "trigger", read: false, write: true, comment: "number starts at 1; (f) trigger, value optional (if sent, must be >= 0.5)" },
   { name: "showwindow", template: "/showwindow", valueType: "float", read: false, write: true, scale: "bool", comment: "0 to hide, 1 to show the TotalMix window" },
   // level meters (send only), peak dB
@@ -27309,7 +27310,7 @@ function validateAddress(address) {
     return {
       ok: false,
       reason: `Unknown ${bus} parameter "${param}".`,
-      hint: `See the totalmix://protocol resource for the valid ${bus} parameters.`
+      hint: `Valid ${bus} params: ${channelParams(bus).map((p) => p.name).join(", ")}.`
     };
   }
   const g = matchGlobal(address);
@@ -27317,7 +27318,7 @@ function validateAddress(address) {
   return {
     ok: false,
     reason: `Address "${address}" does not match any known TotalMix OSC pattern.`,
-    hint: "Check the totalmix://protocol resource for valid addresses."
+    hint: "Expected /mix/(in|pb)/<src>/<submix>/<param>, /(input|playback|output)/<n>/<param>, or a known global address."
   };
 }
 

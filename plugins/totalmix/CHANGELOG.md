@@ -7,6 +7,12 @@ Versioning tiers (see ../../RELEASING.md): 0.0.x alpha, 0.x.0 beta, 1.0.0+
 release. The version here must match the `version` field in
 `.claude-plugin/plugin.json`.
 
+## [0.7.1] - 2026-07-05
+
+### Changed
+- monitoring.md: documented `/layout/save` as a write-only trigger and dropped the incorrect "there is no /layout/save" note; fixed to match the server protocol map.
+- SKILL.md: removed the dead `totalmix://protocol` resource reference (the resource no longer exists; the reference files hold the address list).
+
 ## [0.7.0] - 2026-07-03
 
 ### Added

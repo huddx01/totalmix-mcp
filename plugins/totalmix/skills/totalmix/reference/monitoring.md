@@ -105,12 +105,14 @@ membership.
 /snapshot/load/<n>   rw, n starts at 1, see below
 /snapshot/save       trigger
 /layout/load/<n>     trigger, n starts at 1
+/layout/save         trigger
 ```
 
-There is **no** `/layout/save` — layouts are saved in the TotalMix UI only,
-the protocol has just `load`. All triggers here follow the general rule:
-value optional; if you do send one, it must be at least 0.5 (send 1.0), or
-TotalMix ignores the message.
+`/layout/save` is a plain write-only trigger (saves the current layout), like
+`/snapshot/save`. It is not explicit in the spec table but confirmed on the
+UFX III: accepted, nothing sent back. All triggers here follow the general
+rule: value optional; if you do send one, it must be at least 0.5 (send 1.0),
+or TotalMix ignores the message.
 
 `/snapshot/load/<n>` is the one exception to "triggers are write-only": it is
 read AND write. On write it accepts only the value `1`, which loads that
@@ -147,6 +149,12 @@ Read value `2` means active, `0` means off, `3` means it just changed.
 
 ```json
 [{ "address": "/layout/load/2", "value": 1.0 }]
+```
+
+"Speichere das aktuelle Layout":
+
+```json
+[{ "address": "/layout/save" }]
 ```
 
 ## Level meters (read only)

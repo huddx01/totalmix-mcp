@@ -7,6 +7,12 @@ Versioning tiers (see [RELEASING.md](../RELEASING.md)): `0.0.x` alpha, `0.x.0`
 beta, `1.0.0+` release. The version here must match `version` in
 `package.json`.
 
+## [0.7.1] - 2026-07-05
+
+### Changed
+- protocol.ts: removed the unused `generateReference`/`paramLine` protocol-doc generator and the two stale `totalmix://protocol` resource hints in `validateAddress`; the skills are the sole protocol reference.
+- protocol.ts: re-added `/layout/save` as a write-only trigger (device-confirmed on the UFX III, accepted with no reply; not explicit in the 260626 spec table).
+
 ## [0.7.0] - 2026-07-03
 
 ### Changed

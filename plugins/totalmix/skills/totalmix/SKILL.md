@@ -155,7 +155,7 @@ Matrix crosspoint (send from an input or playback source into an output submix):
 submix 2, dB), `/mix/pb/0/8/balpan` (playback 0 in headphone submix 8, pan).
 
 Level is `fader` (dB) at a crosspoint and `volume` (dB) at an output strip. Pan
-is `balpan` everywhere. Full address list in the `totalmix://protocol` resource.
+is `balpan` everywhere. The reference files hold the full address list per area.
 
 ## Indexing
 

@@ -19,9 +19,10 @@
 //   - added showwindow (0 hide, 1 show the TotalMix window)
 //   - added controlroom/talkchannel, controlroom/extinchannel,
 //     controlroom/extingain
-//   - removed layout/save: it does not exist anywhere in the 260626 spec
-//     (only layout/load does); it had been carried over from the older wiki
-//     reconciliation and was never confirmed on a device
+//   - layout/save: not explicit in the 260626 spec table (only layout/load
+//     is listed), but a UFX III device test confirmed it behaves like the
+//     other write-only triggers (accepted, no value sent back), so it stays
+//     as a write-only trigger
 //   - mutegroup/sologroup/fadergroup: the spec table marks them Rec.-only,
 //     but a UFX III device test showed all three states ARE sent on
 //     /sendsettings, so they stay rw here (spec table considered wrong)
@@ -355,6 +356,7 @@ export const GLOBAL_DEFS: GlobalDef[] = [
       "snapshot-key signalling.",
   },
   { name: "snapshot/save", template: "/snapshot/save", valueType: "trigger", read: false, write: true, comment: "triggers a /snapshot/load message for the newly active snapshot" },
+  { name: "layout/save", template: "/layout/save", valueType: "trigger", read: false, write: true, comment: "write-only trigger, never sent back (device-confirmed, not explicit in the 260626 spec table)" },
   { name: "layout/load", template: "/layout/load/{n}", valueType: "trigger", read: false, write: true, comment: "number starts at 1; (f) trigger, value optional (if sent, must be >= 0.5)" },
   { name: "showwindow", template: "/showwindow", valueType: "float", read: false, write: true, scale: "bool", comment: "0 to hide, 1 to show the TotalMix window" },
   // level meters (send only), peak dB
@@ -447,7 +449,7 @@ export function validateAddress(address: string): ValidationResult {
     return {
       ok: false,
       reason: `Unknown ${bus} parameter "${param}".`,
-      hint: `See the totalmix://protocol resource for the valid ${bus} parameters.`,
+      hint: `Valid ${bus} params: ${channelParams(bus).map((p) => p.name).join(", ")}.`,
     };
   }
 
@@ -458,106 +460,7 @@ export function validateAddress(address: string): ValidationResult {
   return {
     ok: false,
     reason: `Address "${address}" does not match any known TotalMix OSC pattern.`,
-    hint: "Check the totalmix://protocol resource for valid addresses.",
+    hint: "Expected /mix/(in|pb)/<src>/<submix>/<param>, /(input|playback|output)/<n>/<param>, or a known global address.",
   };
 }
 
-// ---- reference text generation --------------------------------------------
-
-function paramLine(p: ParamDef): string {
-  const dir = p.read && p.write ? "rw" : p.read ? "r-" : "-w";
-  const lr = p.lr ? " L/R" : "";
-  const scale = p.scale && p.scale !== "raw" ? ` (${p.scale})` : "";
-  const comment = p.comment ? `  // ${p.comment}` : "";
-  return `  ${p.name}  [${dir}${lr}${scale}]${comment}`;
-}
-
-// Generate the full protocol reference from the data above, so the document
-// the model reads can never drift from what the code actually validates.
-export function generateReference(): string {
-  const lines: string[] = [];
-  lines.push("# TotalMix Global OSC Protocol Reference");
-  lines.push("");
-  lines.push("Generated from the MCP server protocol map (OSCProtocoll_260626, balpan confirmed).");
-  lines.push("Direction: rw = read and write, r- = read only (status/meter),");
-  lines.push("-w = write only (trigger/command). Channels are 0-based.");
-  lines.push("");
-  lines.push("## Important addressing rule");
-  lines.push("");
-  lines.push("Input and playback channels have NO standalone fader. Their level is a");
-  lines.push("matrix send: /mix/in/<input>/<submix>/faderlin and");
-  lines.push("/mix/pb/<playback>/<submix>/faderlin, where <submix> is an output channel.");
-  lines.push("Only output channels have a direct fader: /output/<n>/faderlin.");
-  lines.push("");
-  lines.push("## Write-only addresses never appear in the cache");
-  lines.push("");
-  lines.push("Any address tagged [-w] below (direction = write only, no 'r') is a command");
-  lines.push("TotalMix only ever receives, never sends back, not even in response to");
-  lines.push("/sendall or /sendsettings. This is structural, not a quirk of any specific");
-  lines.push("command: examples include /undo, /redo, all loadpreset triggers, durec");
-  lines.push("transport commands (play/pause/stop/record/next/previous), snapshot/save,");
-  lines.push("layout/load, mutegroup/sologroup/fadergroup, sendall/sendsettings/sendchan/");
-  lines.push("sendmix/sendsubmix, showwindow, and controlroom/recall. Reading one of");
-  lines.push("these with osc_read or looking for it in get_channel output will always");
-  lines.push("come back empty, that is expected, not a bug. Do not retry, resync, or");
-  lines.push("hunt for confirmation: if send_osc_commands did not return an error, treat");
-  lines.push("the command as sent successfully and move on.");
-  lines.push("");
-  lines.push("## Trigger value rule");
-  lines.push("");
-  lines.push("Trigger addresses (valueType trigger, the spec's \"(f)\") need no value. If a");
-  lines.push("value IS sent, it must be at least 0.5 or TotalMix ignores the message, so");
-  lines.push("when in doubt send 1.0. Plain float commands like /sendmix, /sendsubmix and");
-  lines.push("/showwindow are not triggers: they require a value and are rejected without");
-  lines.push("one.");
-  lines.push("");
-  lines.push("## Exception: snapshot/load is read AND write");
-  lines.push("");
-  lines.push("Unlike the write-only commands above, /snapshot/load/<n> is rw: TotalMix");
-  lines.push("sends back 0 (off) / 2 (active) / 3 (changed) for that snapshot slot, and");
-  lines.push("accepts only the value 1 on write to trigger a load. This is the only");
-  lines.push("trigger-style address that can be read back to check current state.");
-  lines.push("");
-  lines.push("## Discovering channel names");
-  lines.push("");
-  lines.push("Channel names (input/playback/output 'name' parameter) are free text the");
-  lines.push("person can rename at any time in TotalMix, never assume a fixed name-to-");
-  lines.push("index mapping. To resolve a name like \"Phones 1\" to a channel number,");
-  lines.push("run osc_sync (scope all or settings) then osc_get_prefix on the relevant");
-  lines.push("bus, e.g. /output, and read each channel's name field from the live cache.");
-  lines.push("");
-  lines.push("## Matrix sends: /mix/in/<src>/<submix>/<param> and /mix/pb/<src>/<submix>/<param>");
-  lines.push("");
-  for (const p of MATRIX_PARAMS) lines.push(paramLine(p));
-  lines.push("");
-  lines.push("## /input/<n>/<param>");
-  lines.push("");
-  for (const p of INPUT_PARAMS) lines.push(paramLine(p));
-  lines.push("");
-  lines.push("## /playback/<n>/<param>");
-  lines.push("");
-  for (const p of PLAYBACK_PARAMS) lines.push(paramLine(p));
-  lines.push("");
-  lines.push("## /output/<n>/<param>");
-  lines.push("");
-  for (const p of OUTPUT_PARAMS) lines.push(paramLine(p));
-  lines.push("");
-  lines.push("## Global and fixed addresses");
-  lines.push("");
-  for (const g of GLOBAL_DEFS) {
-    const dir = g.read && g.write ? "rw" : g.read ? "r-" : "-w";
-    const scale = g.scale && g.scale !== "raw" ? ` (${g.scale})` : "";
-    const comment = g.comment ? `  // ${g.comment}` : "";
-    lines.push(`  ${g.template}  [${dir}${scale}]${comment}`);
-  }
-  lines.push("");
-  lines.push("## Fader curve");
-  lines.push("");
-  lines.push("faderlin is a 0..1 position, not dB. This server does no conversion (it is");
-  lines.push("a dumb pipe): always prefer the dB-native addresses, /mix/.../fader for");
-  lines.push("matrix sends and /output/<n>/volume for output strips, and send dB values");
-  lines.push("directly. RME's official dB<->faderlin conversion code from the spec's");
-  lines.push("\"Fader curve\" sheet is preserved in docs/fader-curve.md for the rare case");
-  lines.push("a faderlin value must be interpreted.");
-  return lines.join("\n");
-}

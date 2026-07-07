@@ -160,6 +160,26 @@ npm start              # uses node --env-file=.env
 probe. `/mcp` is the MCP endpoint and requires the bearer token. See
 "Configuration" above for all `.env` settings.
 
+## Recommended TotalMix OSC settings
+
+One-time setup in TotalMix itself, not something the model needs to read to
+build a command: Options > Settings > OSC > Detailed Settings for the Global
+OSC remote. What the skill assumes:
+
+- **Send changes** on (keeps the cache current on UI changes).
+- **"Follow Submix" disabled** (RME's own recommendation for Global OSC;
+  with it on, mix addresses can target a different submix than expected).
+- **Bandwidth Limitation: None** (syncs settle fastest; the server's UDP
+  buffer handling is built for this).
+- **Receive to hidden channels** on if hidden channels should stay
+  controllable.
+- **Re-send received** + **Re-send if different** on (alpha 8+,
+  device-verified): with both on, TotalMix echoes a received value back
+  ONLY when it had to correct it (e.g. clamping EQ gain 99 to +20);
+  accepted in-range values produce no echo. Minimal traffic, ping-pong
+  safe, and `send_osc_commands` with `confirm: true` reports exactly these
+  corrections.
+
 ## Running as a systemd service (e.g. on a Raspberry Pi)
 
 Sync this `server/` folder to the host as-is (not just the build output) and

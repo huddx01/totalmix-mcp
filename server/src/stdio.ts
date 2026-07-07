@@ -32,7 +32,7 @@ async function main(): Promise<void> {
   // on a fast local Mac the default is rarely a problem.
   osc.send("/sendall", 1.0);
 
-  const server = new McpServer({ name: "totalmix-mcp-stdio", version: "0.7.1" });
+  const server = new McpServer({ name: "totalmix-mcp-stdio", version: "0.7.2" });
   registerTools(server, osc);
 
   const transport = new StdioServerTransport();

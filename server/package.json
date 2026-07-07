@@ -1,6 +1,6 @@
 {
   "name": "totalmix-mcp-server",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "private": true,
   "description": "MCP server for RME TotalMix FX Global OSC. Long-running HTTP daemon with a shared OSC state cache.",
   "type": "module",

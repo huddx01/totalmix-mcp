@@ -27497,7 +27497,7 @@ async function main() {
   const osc2 = new TotalMixOscClient(loadConfig());
   await osc2.open();
   osc2.send("/sendall", 1);
-  const server = new McpServer({ name: "totalmix-mcp-stdio", version: "0.7.1" });
+  const server = new McpServer({ name: "totalmix-mcp-stdio", version: "0.7.2" });
   registerTools(server, osc2);
   const transport = new StdioServerTransport();
   await server.connect(transport);

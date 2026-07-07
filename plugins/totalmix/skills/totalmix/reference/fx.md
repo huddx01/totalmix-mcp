@@ -11,9 +11,6 @@ Controlled entirely through global addresses under `/reverb/...` and
   Per the protocol this exists on input channels only, not on playback.
 - `/output/<n>/fxreturn` raw, how much of the FX return is mixed into that
   output.
-- `/controlroom/mutefx` bool, mutes both reverb and echo together, global.
-  Already covered in `reference/monitoring.md`, listed here again for
-  locality.
 
 Example, "FX-Send von Input 5 auf 20":
 
@@ -119,3 +116,6 @@ Example, "Echo an, Pong Echo, Feedback auf 30":
 - `loadpreset` is a write-only trigger, same pattern as the per-channel
   loadpreset addresses in `reference/channelstrip.md`. Never appears in the
   cache, not even after a full `osc_sync`, that is expected, not a bug.
+- `/controlroom/mutefx` is NOT a mute for reverb/echo themselves, it only
+  mutes the FX signal on Main Out / Speaker B. See `reference/monitoring.md`
+  (Control room) for that address, it does not belong in this file.

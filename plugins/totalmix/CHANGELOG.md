@@ -7,6 +7,11 @@ Versioning tiers (see ../../RELEASING.md): 0.0.x alpha, 0.x.0 beta, 1.0.0+
 release. The version here must match the `version` field in
 `.claude-plugin/plugin.json`.
 
+## [0.7.2] - 2026-07-05
+
+### Changed
+- restructure skills
+
 ## [0.7.1] - 2026-07-05
 
 ### Changed

@@ -75,8 +75,11 @@ Drop into the sections below only for these:
 - `reference/mixing.md` levels, mute, solo, pan, relative changes. The everyday work.
 - `reference/routing.md` matrix, submixes, building headphone mixes.
 - `reference/channelstrip.md` gain, EQ, dynamics, low cut, room EQ per channel.
-- `reference/monitoring.md` control room, dim, mono, groups, snapshots, meters, status, DURec.
+- `reference/monitoring.md` control room, dim, mono, groups, snapshots, resend/resync.
 - `reference/fx.md` reverb and echo, the two global send effects, plus fxsend/fxreturn.
+- `reference/durec.md` DURec record transport (UFX/UCX with a USB stick only).
+- `reference/misc.md` device status, undo/redo, show/hide window, level meters.
+  Small, unrelated odds and ends, read only for the one address you need.
 
 Read the relevant file as soon as a request falls into its area. The conventions
 here apply everywhere and are not repeated in the reference files.
@@ -225,13 +228,35 @@ trusting a remembered value.
 
 The main mix is the submix of output 0 unless a headphone or other mix is named.
 
-## Names to indices
+## Names and color to indices
 
 When the person uses a name ("der Gesang") instead of a number, call
 `get_channel_names` once (a cheap cache read), map the name to its 0-based index,
 and remember the mapping for the rest of the session. If the name is not found,
 run `osc_sync` with `all` once, then `get_channel_names` again, since the cache
 may be stale.
+
+Channel color follows the same shape as names (a per-channel identifying
+attribute, resolved once and remembered), but is read-only:
+
+```
+/input/<n>/color   /playback/<n>/color   /output/<n>/color
+```
+
+Send only, cannot be set via OSC, that has to happen in the TotalMix UI. `0`
+means hidden, `1..8` is a color index in the picker's order (device-verified
+against a UFX III):
+
+```
+1 white (default)   3 orange   5 blue    7 yellow
+2 grey              4 red      6 green   8 pink
+```
+
+The picker's "(various)" entry is not a color: the TotalMix UI shows it on a
+multi-channel selection whose channels have differing colors. It never
+appears as an OSC value. Use this for "welche Farbe hat Kanal X" questions,
+via `osc_read` once the cache holds the address (no dedicated resend needed
+beyond the usual `osc_sync` if the cache looks stale).
 
 ## Reading
 
@@ -244,12 +269,12 @@ steps. Use the cheaper path when you can:
   `osc_read`. No wait.
 - Do not read just to confirm a write. A clean `send_osc_commands` result means
   it went out.
-- With TotalMix's "Re-send received" + "Re-send if different" on (see
-  `reference/monitoring.md`, recommended settings), corrected values are
-  echoed back into the cache. An accepted in-range write is NOT echoed, so
-  after your own writes the cache holds your sent value's predecessor —
-  trust what you sent instead of re-reading; only a correction echo
-  (readable via `confirm: true`) overrides that.
+- With TotalMix's "Re-send received" + "Re-send if different" on (the
+  recommended combination, documented in the server README), corrected
+  values are echoed back into the cache. An accepted in-range write is NOT
+  echoed, so after your own writes the cache holds your sent value's
+  predecessor — trust what you sent instead of re-reading; only a
+  correction echo (readable via `confirm: true`) overrides that.
 
 If `get_channel` comes back empty, the settle window was too short (raise
 `settle_ms`) or that channel is hidden from OSC control in TotalMix.

@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "totalmix-mcp",
   "display_name": "TotalMix FX Control",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "Control an RME TotalMix FX mixer by voice or text through Claude, locally over OSC.",
   "long_description": "Runs a small local MCP server that talks to RME TotalMix FX over OSC on the same machine (or another host on your LAN). Nothing goes over the internet. Pair it with the TotalMix skill (uploaded separately in Settings > Customize > Skills) for full mixing knowledge: dB conventions, channel mapping, stereo handling, routing, submixes, headphone mixes, EQ, dynamics, and monitoring. Requires TotalMix FX with OSC enabled (Options > OSC).",
   "author": {

@@ -31,7 +31,7 @@ const DEBUG_ENABLED = (process.env.MCP_DEBUG_ENABLED ?? "false").toLowerCase() =
 // down with the response, but they all close over the same osc singleton,
 // so they all read and write the same cache and the same UDP socket.
 function buildServer(osc: TotalMixOscClient): McpServer {
-  const server = new McpServer({ name: "totalmix-mcp-http", version: "0.7.2" });
+  const server = new McpServer({ name: "totalmix-mcp-http", version: "0.7.3" });
   registerTools(server, osc);
   return server;
 }

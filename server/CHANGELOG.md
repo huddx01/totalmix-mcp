@@ -7,6 +7,11 @@ Versioning tiers (see [RELEASING.md](../RELEASING.md)): `0.0.x` alpha, `0.x.0`
 beta, `1.0.0+` release. The version here must match `version` in
 `package.json`.
 
+## [0.7.3] - 2026-08-04
+
+### Changed
+- make depedabot happy
+
 ## [0.7.2] - 2026-07-05
 
 ### Changed

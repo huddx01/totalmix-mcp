@@ -1,6 +1,6 @@
 {
   "name": "totalmix",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "Control an RME TotalMix FX mixer via OSC: levels, mute, solo, pan, routing, submixes, headphone mixes, EQ, dynamics, monitoring. Bundles the totalmix MCP server.",
   "author": {
     "name": "huddx01 (aka meg33)"
